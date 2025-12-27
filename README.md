@@ -62,6 +62,8 @@ apt install build-essential liblzma liblz4 libbz2 zlib pkg-config \
             clang rust cmake ninja
 ````
 
+When configuring, pass `-DCMAKE_INSTALL_PREFIX=$PREFIX` to CMake.
+
 </details>
 
 <details><summary>Linux</summary>
@@ -146,7 +148,7 @@ pacman -S --needed base-devel pactoys
 pacboy -S --needed {xz,lz4,bzip2,zlib,pkgconf,clang,cmake,libc++,ninja,rust}:p
 ````
 
-##### Cross builds
+##### Cross-compiling
 
 If you are cross-compiling from a non-Windows host and using vcpkg to manage the dependencies, please make sure CMake variable `MINGW` is set to `TRUE` during configuring.
 
@@ -170,9 +172,7 @@ When configuring, use `cygwin64-cmake` (`x86_64-pc-cygwin-cmake` on arch-cygwin)
 
 For Fedora Cygwin, you need to build the LLVM & Clang yourself, a patched [LLVM 15 source](https://github.com/ookiineko-cygport/llvm-project) is there. To use the patched Clang in Fedora Cygwin, set both `CMAKE_C_COMPILER_TARGET` and `CMAKE_CXX_COMPILER_TARGET` to `x86_64-unknown-windows-cygnus` and `CMAKE_SYSROOT` to `/usr/x86_64-pc-cygwin/sys-root` when configuring.
 
-On Fedora Cygwin, there is another issue that `cygwin64-cmake` overrides C and C++ compilers to GCC, this is not supported by Magisk, and somehow ignoring the `CC` and `CXX` variables we are settings. To workaround this, set `CMAKE_C_COMPILER` and `CMAKE_CXX_COMPILER` manually to the path of the previous Cygwin cross Clang and Clang++.
-
-On arch-cygwin, set `CYGWIN_CC` and `CYGWIN_CXX` to `x86_64-pc-cygwin-clang` and `x86_64-pc-cygwin-clang++`.
+On Fedora Cygwin, there is another issue that `cygwin64-cmake` overrides C and C++ compilers to GCC, this is not supported by Magisk, and somehow ignoring the `CC` and `CXX` variables we are settings. To workaround this, set `CMAKE_C_COMPILER` and `CMAKE_CXX_COMPILER` manually to the path of the previous Cygwin cross Clang and Clang++. On arch-cygwin, set `CYGWIN_CC` and `CYGWIN_CXX` to `x86_64-pc-cygwin-clang` and `x86_64-pc-cygwin-clang++`.
 
 </details>
 
@@ -186,7 +186,7 @@ On arch-cygwin, set `CYGWIN_CC` and `CYGWIN_CXX` to `x86_64-pc-cygwin-clang` and
 >
 > A web frontend wrapper must be written to handle the argument passing and file system management in browsers.
 >
-> This should be implemented soon in the future ([#19](../../issues/19)), but unfortunately I am not a web developer, any help on this will be welcome QwQ
+> This should be implemented soon in the future, but unfortunately I am not a web developer, any help on this will be welcome QwQ
 
 Please read the [Cross compiling](#cross-compiling) instructions first.
 
@@ -194,7 +194,7 @@ Install the [Emscripten][Emscripten] SDK and also a Rust compiler with Emscripte
 
 > **Warning**
 >
-> emsdk version 3.1.37 is recommended, you might run into weird problems with other versions.
+> emsdk version 3.1.31 is recommended, you might run into weird problems with other versions.
 
 Use [vcpkg][vcpkg] to install the [depended libraries](#requirements), the triplet is called `wasm32-emscripten`.
 
@@ -248,13 +248,13 @@ Note: these variables are using [CMake's list syntax](https://cmake.org/cmake/he
 
 #### Cross compiling
 
-First get a cross-compiler and likely also a Clang from somewhere (usually your distribution's package manager). If you don't have Libc++ installed for your crossed target, you could probably also try to link against [Libstdc++][Libstdcxx] instead, see [this part](#can-i-build-without-libcxx).
+First get a cross-compiler with Libc++ and Clang by either installing from source or downloading it from somewhere (usually your distribution's package manager).
 
 Install Rust using [rustup][rustup] and add your cross target like this: `rustup target add aarch64-unknown-linux-gnu` (replace `aarch64-unknown-linux-gnu` with the Rust target of your target platform).
 
 If the cross Rust target can't be installed using [rustup][rustup], you can still compile if you build the Rust standard library (STD) from source, to do this, pass `-DRUST_BUILD_STD=ON` during configuration (Note this will require Nightly Rust and the STD source code to be installed on your system).
 
-To cross-compile, you may need a [CMake toolchain file][cmake-toolchains] describing your target specs (for example the sysroot location, and target triplet for using Clang), the location of the cross compiler toolchain and strategy for CMake to seek for the depended libraries.
+To cross-compile, you may need a [CMake toolchain file][cmake-toolchains] describing your target specs, the location of the cross compiler toolchain and strategy for CMake to seek for the depended libraries.
 
 You can install the depended libraries for your cross target by using [vcpkg][vcpkg], for example:
 

@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <sys/stat.h>
@@ -13,7 +12,7 @@ int _mkdir_stub (const char *path, mode_t mode) {
 
     if (chmod(path, mode) < 0) {
         int old_errno = errno;
-        assert(!rmdir(path));  // mkdir() just succeed, how come
+        rmdir(path);
         errno = old_errno;
         return -1;
     }
